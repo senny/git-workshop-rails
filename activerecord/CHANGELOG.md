@@ -1,117 +1,12 @@
 *   `has_and_belongs_to_many` is now transparently implemented in terms of
     `has_many :through`.  Behavior should remain the same, if not, it is a bug.
 
-
 *   `create_savepoint`, `rollback_to_savepoint` and `release_savepoint` accept
     a savepoint name.
 
 *   `validates_size_of` / `validates_length_of` do not count records,
     which are `marked_for_destruction?`.
     Fixes #7247.
-
-    *Yves Senn*
-
-*   Add an `add_index` override in Postgresql adapter and MySQL adapter
-    to allow custom index type support. Fixes #6101.
-
-        add_index(:wikis, :body, :using => 'gin')
-
-    *Stefan Huber* and *Doabit*
-
-*   After extraction of mass-assignment attributes (which protects [id, type]
-    by default) we can pass id to `update_attributes` and it will update
-    another record because id will be used in where statement. We never have
-    to change id in where statement because we try to set/replace fields for
-    already loaded record but we have to try to set new id for that record.
-
-    *Dmitry Vorotilin*
-
-*   Models with multiple counter cache associations now update correctly on destroy.
-    See #7706.
-
-    *Ian Young*
-
-*   If ``:inverse_of` is true on an association, then when one calls `find()` on
-    the association, Active Record will first look through the in-memory objects
-    in the association for a particular id. Then, it will go to the DB if it
-    is not found. This is accomplished by calling `find_by_scan` in
-    collection associations whenever `options[:inverse_of]` is not nil.
-
-    Fixes #9470.
-
-    *John Wang*
-
-*   `rake db:create` does not change permissions of the MySQL root user.
-    Fixes #8079.
-
-    *Yves Senn*
-
-*   The length of the `version` column in the `schema_migrations` table
-    created by the `mysql2` adapter is 191 if the encoding is "utf8mb4".
-
-    The "utf8" encoding in MySQL has support for a maximum of 3 bytes per character,
-    and only contains characters from the BMP. The recently added
-    [utf8mb4](http://dev.mysql.com/doc/refman/5.5/en/charset-unicode-utf8mb4.html)
-    encoding extends the support to four bytes. As of this writing, said encoding
-    is supported in the betas of the `mysql2` gem.
-
-    Setting the encoding to "utf8mb4" has
-    [a few implications](http://dev.mysql.com/doc/refman/5.5/en/charset-unicode-upgrading.html).
-    This change addresses the max length for indexes, which is 191 instead of 255.
-
-    *Xavier Noria*
-
-*   Counter caches on associations will now stay valid when attributes are
-    updated (not just when records are created or destroyed), for example,
-    when calling `update_attributes`. The following code now works:
-
-        class Comment < ActiveRecord::Base
-          belongs_to :post, counter_cache: true
-        end
-
-        class Post < ActiveRecord::Base
-          has_many :comments
-        end
-
-        post = Post.create
-        comment = Comment.create
-
-        post.comments << comment
-        post.save.reload.comments_count # => 1
-        comment.update_attributes(post_id: nil)
-
-        post.save.reload.comments_count # => 0
-
-    Updating the id of a `belongs_to` object with the id of a new object will
-    also keep the count accurate.
-
-    *John Wang*
-
-*   Referencing join tables implicitly was deprecated. There is a
-    possibility that these deprecation warnings are shown even if you
-    don't make use of that feature. You can now disable the feature entirely.
-    Fixes #9712.
-
-    Example:
-
-        # in your configuration
-        config.active_record.disable_implicit_join_references = true
-
-        # or directly
-        ActiveRecord::Base.disable_implicit_join_references = true
-
-    *Yves Senn*
-
-*   The `:distinct` option for `Relation#count` is deprecated. You
-    should use `Relation#distinct` instead.
-
-    Example:
-
-        # Before
-        Post.select(:author_name).count(distinct: true)
-
-        # After
-        Post.select(:author_name).distinct.count
 
     *Yves Senn*
 
