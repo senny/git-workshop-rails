@@ -1,14 +1,11 @@
-# encoding: utf-8
 require "cases/helper"
 require 'models/topic'
 require 'models/reply'
-require 'models/owner'
-require 'models/pet'
 require 'models/man'
 require 'models/interest'
 
 class AssociationValidationTest < ActiveRecord::TestCase
-  fixtures :topics, :owners
+  fixtures :topics
 
   repair_validations(Topic, Reply)
 

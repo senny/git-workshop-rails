@@ -4,6 +4,10 @@
 *   `create_savepoint`, `rollback_to_savepoint` and `release_savepoint` accept
     a savepoint name.
 
+*   `validates_size_of` / `validates_length_of` do not count records,
+    which are `marked_for_destruction?`.
+    Fixes #7247.
+
     *Yves Senn*
 
 *   Make `next_migration_number` accessible for third party generators.
